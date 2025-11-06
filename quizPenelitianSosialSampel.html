@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Populasi dan Sampel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 15px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            height: 8px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 15px;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .score-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .quiz-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .question-number {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .question-text {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            line-height: 1.5;
+            color: #333;
+        }
+
+        .option {
+            background: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .option:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: #f0f3ff;
+        }
+
+        .option.correct {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+        .option.incorrect {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .option.disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .option-label {
+            font-weight: bold;
+            margin-right: 10px;
+            color: #667eea;
+            min-width: 25px;
+        }
+
+        .option-text {
+            flex: 1;
+        }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.correct {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback.incorrect {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .explanation {
+            margin-top: 8px;
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-next {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-next:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .btn-prev {
+            background: #f8f9fa;
+            color: #333;
+            border: 2px solid #dee2e6;
+        }
+
+        .btn:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+
+        .result-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .result-score {
+            font-size: 48px;
+            font-weight: bold;
+            color: #667eea;
+            margin: 20px 0;
+        }
+
+        .result-message {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #666;
+        }
+
+        .btn-restart {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .emoji {
+            font-size: 64px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Quiz Populasi dan Sampel</h1>
+            <div class="score-info">
+                <span>Soal: <span id="current-question">1</span>/<span id="total-questions">25</span></span>
+                <span>Skor: <span id="score">0</span></span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+        </div>
+
+        <div id="quiz-container"></div>
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                question: "Sampel adalah...",
+                options: ["Semua objek yang diteliti", "Sebagian dari populasi yang diteliti", "Hasil akhir penelitian", "Alat pengumpul data", "Hanya responden laki-laki"],
+                correct: 1,
+                explanation: "Sampel adalah bagian dari populasi yang mewakili keseluruhan."
+            },
+            {
+                question: "Tujuan utama penggunaan sampel dalam penelitian adalah...",
+                options: ["Menghindari kesalahan", "Mewakili populasi", "Menghemat waktu saja", "Mengurangi jumlah data", "Menentukan teori"],
+                correct: 1,
+                explanation: "Sampel dipilih agar hasil penelitian menggambarkan populasi."
+            },
+            {
+                question: "Populasi adalah...",
+                options: ["Hasil penelitian", "Semua anggota yang diteliti", "Sebagian kecil responden", "Data sekunder", "Variabel bebas"],
+                correct: 1,
+                explanation: "Populasi mencakup seluruh objek atau individu dalam penelitian."
+            },
+            {
+                question: "Teknik pengambilan sampel secara acak disebut...",
+                options: ["Purposive sampling", "Quota sampling", "Simple random sampling", "Cluster sampling", "Snowball sampling"],
+                correct: 2,
+                explanation: "Setiap anggota populasi memiliki kesempatan yang sama untuk dipilih."
+            },
+            {
+                question: "Teknik pengambilan sampel berdasarkan kelompok atau wilayah disebut...",
+                options: ["Cluster sampling", "Purposive sampling", "Stratified sampling", "Random sampling", "Quota sampling"],
+                correct: 0,
+                explanation: "Cluster = klaster (wilayah)."
+            },
+            {
+                question: "Teknik pengambilan sampel dengan membagi populasi menjadi lapisan-lapisan tertentu disebut...",
+                options: ["Random sampling", "Systematic sampling", "Stratified sampling", "Quota sampling", "Purposive sampling"],
+                correct: 2,
+                explanation: "Stratified berarti berlapis (strata)."
+            },
+            {
+                question: "Teknik pengambilan sampel secara sengaja karena pertimbangan peneliti disebut...",
+                options: ["Simple random sampling", "Purposive sampling", "Cluster sampling", "Stratified sampling", "Quota sampling"],
+                correct: 1,
+                explanation: "Peneliti memilih berdasarkan kriteria tertentu."
+            },
+            {
+                question: "Teknik pengambilan sampel di mana setiap anggota populasi diambil dengan selang tertentu disebut...",
+                options: ["Cluster sampling", "Purposive sampling", "Systematic sampling", "Random sampling", "Stratified sampling"],
+                correct: 2,
+                explanation: "Contoh: memilih setiap siswa ke-10 dari daftar nama."
+            },
+            {
+                question: "Teknik pengambilan sampel berdasarkan jumlah tertentu dari setiap kelompok disebut...",
+                options: ["Purposive sampling", "Quota sampling", "Cluster sampling", "Stratified sampling", "Snowball sampling"],
+                correct: 1,
+                explanation: "Quota = jumlah kuota yang harus dipenuhi dari tiap kategori."
+            },
+            {
+                question: "Teknik pengambilan sampel yang dilakukan dari satu responden ke responden lain disebut...",
+                options: ["Cluster sampling", "Snowball sampling", "Random sampling", "Purposive sampling", "Systematic sampling"],
+                correct: 1,
+                explanation: "Responden pertama memperkenalkan peneliti ke responden berikutnya."
+            },
+            {
+                question: "Dalam penelitian, jumlah populasi 1.000 orang, dan peneliti mengambil 100 orang secara acak. Maka 100 orang itu disebut...",
+                options: ["Populasi", "Variabel", "Sampel", "Data", "Responden sekunder"],
+                correct: 2,
+                explanation: "100 orang mewakili populasi → disebut sampel."
+            },
+            {
+                question: "Syarat utama sampel yang baik adalah...",
+                options: ["Jumlahnya banyak", "Diambil dari daerah tertentu", "Mewakili karakteristik populasi", "Dipilih oleh guru", "Tidak perlu acak"],
+                correct: 2,
+                explanation: "Sampel harus representatif (mewakili populasi)."
+            },
+            {
+                question: "Contoh penggunaan purposive sampling adalah...",
+                options: ["Mengundi nama siswa", "Memilih kepala desa dan tokoh masyarakat", "Memilih siswa secara acak", "Memilih siswa ke-5 dari daftar", "Memilih berdasarkan kuota"],
+                correct: 1,
+                explanation: "Dipilih karena memenuhi kriteria tertentu."
+            },
+            {
+                question: "Jika populasi sangat besar dan tersebar di banyak wilayah, teknik yang tepat adalah...",
+                options: ["Purposive sampling", "Cluster sampling", "Simple random sampling", "Quota sampling", "Stratified sampling"],
+                correct: 1,
+                explanation: "Cluster sampling digunakan pada populasi luas dan berkelompok."
+            },
+            {
+                question: "Teknik pengambilan sampel yang mudah dilakukan tanpa memperhatikan perwakilan disebut...",
+                options: ["Accidental sampling", "Stratified sampling", "Random sampling", "Purposive sampling", "Quota sampling"],
+                correct: 0,
+                explanation: "Responden yang kebetulan ditemui dijadikan sampel."
+            },
+            {
+                question: "Contoh systematic sampling adalah...",
+                options: ["Mengambil setiap siswa ke-10 dari daftar", "Mengambil siswa secara acak", "Memilih tokoh masyarakat", "Membagi populasi menjadi strata", "Memilih berdasarkan kuota"],
+                correct: 0,
+                explanation: "Menggunakan pola tertentu dalam pemilihan sampel."
+            },
+            {
+                question: "Tujuan pengambilan sampel adalah agar hasil penelitian...",
+                options: ["Cepat selesai", "Mewakili populasi", "Tidak perlu data banyak", "Menjadi rahasia", "Tidak perlu validasi"],
+                correct: 1,
+                explanation: "Hasil penelitian sampel dianggap menggambarkan populasi."
+            },
+            {
+                question: "Populasi yang jumlahnya besar membuat peneliti menggunakan...",
+                options: ["Sampel", "Data sekunder", "Populasi total", "Hipotesis", "Survei nasional"],
+                correct: 0,
+                explanation: "Sampel membantu penelitian menjadi efisien."
+            },
+            {
+                question: "Apabila populasi kecil (kurang dari 50 orang), maka penelitian sebaiknya menggunakan...",
+                options: ["Sampling", "Total sampling", "Random sampling", "Purposive sampling", "Cluster sampling"],
+                correct: 1,
+                explanation: "Semua anggota populasi dijadikan responden."
+            },
+            {
+                question: "Sampel yang baik memiliki sifat...",
+                options: ["Subjektif", "Representatif", "Acak sepenuhnya", "Kecil", "Tidak pasti"],
+                correct: 1,
+                explanation: "Sampel representatif menggambarkan populasi dengan akurat."
+            },
+            {
+                question: "Yang bukan termasuk teknik sampling adalah...",
+                options: ["Cluster sampling", "Snowball sampling", "Stratified sampling", "Kuisioner sampling", "Random sampling"],
+                correct: 3,
+                explanation: "Kuesioner adalah alat pengumpulan data, bukan teknik sampling."
+            },
+            {
+                question: "Teknik pengambilan sampel berdasarkan pertimbangan peneliti dan jumlah tertentu disebut...",
+                options: ["Cluster sampling", "Quota sampling", "Systematic sampling", "Random sampling", "Stratified sampling"],
+                correct: 1,
+                explanation: "Quota sampling menggabungkan jumlah (kuota) dan kriteria tertentu."
+            },
+            {
+                question: "Jika populasi terdiri dari 60% laki-laki dan 40% perempuan, maka teknik yang tepat untuk mewakilinya adalah...",
+                options: ["Stratified sampling", "Cluster sampling", "Random sampling", "Purposive sampling", "Snowball sampling"],
+                correct: 0,
+                explanation: "Stratified sampling mempertahankan proporsi dalam populasi."
+            },
+            {
+                question: "Sampel yang jumlahnya besar tetapi tidak representatif akan menghasilkan data yang...",
+                options: ["Akurat", "Tidak valid", "Netral", "Lengkap", "Benar"],
+                correct: 1,
+                explanation: "Tidak mewakili populasi → hasil penelitian tidak valid."
+            },
+            {
+                question: "Teknik pengambilan sampel di mana peneliti memilih sampel secara kebetulan disebut...",
+                options: ["Accidental sampling", "Purposive sampling", "Stratified sampling", "Cluster sampling", "Quota sampling"],
+                correct: 0,
+                explanation: "Contoh: siapa saja yang kebetulan ditemui dijadikan responden."
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let userAnswers = [];
+        let shuffledQuestions = [];
+
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        function shuffleOptions(question) {
+            const indices = [0, 1, 2, 3, 4];
+            const shuffledIndices = shuffleArray(indices);
+            const shuffledOptions = shuffledIndices.map(i => question.options[i]);
+            const newCorrectIndex = shuffledIndices.indexOf(question.correct);
+            
+            return {
+                ...question,
+                options: shuffledOptions,
+                correct: newCorrectIndex,
+                originalCorrect: question.correct
+            };
+        }
+
+        function initQuiz() {
+            shuffledQuestions = quizData.map(q => shuffleOptions(q));
+            currentQuestion = 0;
+            score = 0;
+            userAnswers = new Array(shuffledQuestions.length).fill(null);
+            document.getElementById('total-questions').textContent = shuffledQuestions.length;
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const question = shuffledQuestions[currentQuestion];
+            const container = document.getElementById('quiz-container');
+            
+            const optionsHTML = question.options.map((option, index) => `
+                <div class="option" onclick="selectAnswer(${index})">
+                    <span class="option-label">${String.fromCharCode(65 + index)}.</span>
+                    <span class="option-text">${option}</span>
+                </div>
+            `).join('');
+
+            container.innerHTML = `
+                <div class="quiz-card">
+                    <div class="question-number">Pertanyaan ${currentQuestion + 1} dari ${shuffledQuestions.length}</div>
+                    <div class="question-text">${question.question}</div>
+                    <div id="options-container">
+                        ${optionsHTML}
+                    </div>
+                    <div class="feedback" id="feedback"></div>
+                    <div class="nav-buttons">
+                        ${currentQuestion > 0 ? '<button class="btn btn-prev" onclick="prevQuestion()">← Sebelumnya</button>' : '<div></div>'}
+                        <button class="btn btn-next" id="next-btn" onclick="nextQuestion()" disabled>
+                            ${currentQuestion === shuffledQuestions.length - 1 ? 'Selesai →' : 'Selanjutnya →'}
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            updateProgress();
+            
+            if (userAnswers[currentQuestion] !== null) {
+                selectAnswer(userAnswers[currentQuestion], true);
+            }
+        }
+
+        function selectAnswer(index, isRevisit = false) {
+            if (!isRevisit && userAnswers[currentQuestion] !== null) return;
+
+            const options = document.querySelectorAll('.option');
+            const question = shuffledQuestions[currentQuestion];
+            const feedback = document.getElementById('feedback');
+            const nextBtn = document.getElementById('next-btn');
+
+            options.forEach(opt => opt.classList.add('disabled'));
+            options[index].classList.add('selected');
+
+            if (!isRevisit) {
+                userAnswers[currentQuestion] = index;
+
+                if (index === question.correct) {
+                    options[index].classList.add('correct');
+                    feedback.className = 'feedback correct show';
+                    feedback.innerHTML = `
+                        <strong>✅ Benar!</strong>
+                        <div class="explanation">${question.explanation}</div>
+                    `;
+                    score++;
+                    document.getElementById('score').textContent = score;
+                } else {
+                    options[index].classList.add('incorrect');
+                    options[question.correct].classList.add('correct');
+                    feedback.className = 'feedback incorrect show';
+                    feedback.innerHTML = `
+                        <strong>❌ Kurang Tepat</strong>
+                        <div class="explanation">Jawaban yang benar: <strong>${String.fromCharCode(65 + question.correct)}</strong>. ${question.explanation}</div>
+                    `;
+                }
+            } else {
+                if (index === question.correct) {
+                    options[index].classList.add('correct');
+                    feedback.className = 'feedback correct show';
+                    feedback.innerHTML = `
+                        <strong>✅ Benar!</strong>
+                        <div class="explanation">${question.explanation}</div>
+                    `;
+                } else {
+                    options[index].classList.add('incorrect');
+                    options[question.correct].classList.add('correct');
+                    feedback.className = 'feedback incorrect show';
+                    feedback.innerHTML = `
+                        <strong>❌ Kurang Tepat</strong>
+                        <div class="explanation">Jawaban yang benar: <strong>${String.fromCharCode(65 + question.correct)}</strong>. ${question.explanation}</div>
+                    `;
+                }
+            }
+
+            nextBtn.disabled = false;
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < shuffledQuestions.length - 1) {
+                currentQuestion++;
+                showQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                showQuestion();
+            }
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / shuffledQuestions.length) * 100;
+            document.getElementById('progress').style.width = progress + '%';
+            document.getElementById('current-question').textContent = currentQuestion + 1;
+        }
+
+        function showResults() {
+            const container = document.getElementById('quiz-container');
+            const percentage = (score / shuffledQuestions.length * 100).toFixed(0);
+            
+            let emoji = '🎉';
+            let message = 'Luar biasa!';
+            
+            if (percentage >= 90) {
+                emoji = '🏆';
+                message = 'Sempurna! Anda sangat menguasai materi!';
+            } else if (percentage >= 75) {
+                emoji = '🎉';
+                message = 'Bagus sekali! Pemahaman Anda sangat baik!';
+            } else if (percentage >= 60) {
+                emoji = '👍';
+                message = 'Cukup baik! Terus tingkatkan pemahaman Anda!';
+            } else {
+                emoji = '📚';
+                message = 'Tetap semangat! Pelajari lagi materinya ya!';
+            }
+
+            container.innerHTML = `
+                <div class="result-card">
+                    <div class="emoji">${emoji}</div>
+                    <h2>Quiz Selesai!</h2>
+                    <div class="result-score">${score}/${shuffledQuestions.length}</div>
+                    <div class="result-message">${message}</div>
+                    <div style="font-size: 18px; color: #667eea; font-weight: 600;">
+                        Nilai Anda: ${percentage}%
+                    </div>
+                    <button class="btn-restart" onclick="initQuiz()">🔄 Ulangi Quiz</button>
+                </div>
+            `;
+        }
+
+        initQuiz();
+    </script>
+</body>
+</html>
