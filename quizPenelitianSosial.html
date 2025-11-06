@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Penelitian Sosial</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .progress-container {
+            background: rgba(255,255,255,0.3);
+            border-radius: 10px;
+            padding: 10px;
+            margin-top: 15px;
+        }
+
+        .progress-bar {
+            background: white;
+            height: 8px;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            margin-top: 8px;
+            font-size: 14px;
+        }
+
+        .quiz-content {
+            padding: 25px;
+        }
+
+        .question-card {
+            margin-bottom: 25px;
+        }
+
+        .question-number {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .question-text {
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f0f3ff;
+            transform: translateX(5px);
+        }
+
+        .option input[type="radio"] {
+            margin-right: 12px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .option label {
+            cursor: pointer;
+            flex: 1;
+            font-size: 16px;
+        }
+
+        .option.correct {
+            background: #d4edda;
+            border-color: #28a745;
+        }
+
+        .option.incorrect {
+            background: #f8d7da;
+            border-color: #dc3545;
+        }
+
+        .option.disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .explanation {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .explanation.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 25px;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .result-card {
+            text-align: center;
+            padding: 30px;
+        }
+
+        .result-card h2 {
+            color: #667eea;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            font-weight: bold;
+            margin: 20px auto;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .result-details {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Quiz Penelitian Sosial</h1>
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+                <div class="progress-text" id="progressText">Soal 1 dari 25</div>
+            </div>
+        </div>
+
+        <div class="quiz-content" id="quizContent"></div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "Penelitian sosial merupakan kegiatan yang dilakukan secara sistematis untuk mempelajari...",
+                options: ["Alam dan lingkungan", "Gejala sosial dalam masyarakat", "Nilai-nilai ekonomi", "Budaya luar negeri", "Kegiatan politik dunia"],
+                correct: 1,
+                explanation: "Penelitian sosial berfokus pada perilaku dan fenomena sosial masyarakat."
+            },
+            {
+                question: "Langkah pertama dalam penelitian sosial adalah...",
+                options: ["Menyusun laporan", "Merumuskan masalah", "Mengolah data", "Menarik kesimpulan", "Studi literatur"],
+                correct: 1,
+                explanation: "Peneliti harus menentukan masalah agar penelitian terarah."
+            },
+            {
+                question: "Data yang diperoleh langsung dari lapangan disebut data...",
+                options: ["Sekunder", "Primer", "Kuantitatif", "Kualitatif", "Dokumenter"],
+                correct: 1,
+                explanation: "Data primer diperoleh melalui wawancara, observasi, atau kuesioner."
+            },
+            {
+                question: "Data yang diperoleh dari buku atau jurnal disebut data...",
+                options: ["Primer", "Sekunder", "Kuantitatif", "Kualitatif", "Fisik"],
+                correct: 1,
+                explanation: "Data sekunder bersumber dari dokumen atau penelitian terdahulu."
+            },
+            {
+                question: "Penelitian yang bertujuan menggambarkan suatu fenomena disebut penelitian...",
+                options: ["Eksploratif", "Deskriptif", "Eksplanatori", "Evaluatif", "Prediktif"],
+                correct: 1,
+                explanation: "Penelitian deskriptif hanya menggambarkan fakta apa adanya."
+            },
+            {
+                question: "Penelitian yang bertujuan menjelaskan hubungan sebab-akibat disebut penelitian...",
+                options: ["Deskriptif", "Eksploratif", "Eksplanatori", "Evaluatif", "Prediktif"],
+                correct: 2,
+                explanation: "Eksplanatori berarti menjelaskan hubungan antarvariabel."
+            },
+            {
+                question: "Penelitian yang menilai keberhasilan suatu program disebut penelitian...",
+                options: ["Eksploratif", "Deskriptif", "Evaluatif", "Eksplanatori", "Prediktif"],
+                correct: 2,
+                explanation: "Evaluatif digunakan untuk menilai hasil kebijakan atau program."
+            },
+            {
+                question: "Penelitian yang digunakan untuk memperkirakan fenomena sosial di masa depan disebut...",
+                options: ["Eksploratif", "Prediktif", "Deskriptif", "Evaluatif", "Eksplanatori"],
+                correct: 1,
+                explanation: "Prediktif berasal dari kata \"prediksi\" (meramalkan)."
+            },
+            {
+                question: "Penelitian yang digunakan untuk menggali fenomena yang belum banyak diketahui disebut...",
+                options: ["Eksploratif", "Eksplanatori", "Deskriptif", "Evaluatif", "Prediktif"],
+                correct: 0,
+                explanation: "Eksploratif dilakukan untuk menemukan masalah baru."
+            },
+            {
+                question: "Variabel yang memengaruhi variabel lain disebut variabel...",
+                options: ["Terikat", "Moderator", "Intervening", "Kontrol", "Bebas"],
+                correct: 4,
+                explanation: "Variabel bebas = penyebab (independent variable)."
+            },
+            {
+                question: "Variabel yang dipengaruhi disebut variabel...",
+                options: ["Terikat", "Bebas", "Kontrol", "Intervening", "Moderator"],
+                correct: 0,
+                explanation: "Variabel terikat = akibat (dependent variable)."
+            },
+            {
+                question: "Sebagian kecil dari populasi yang dijadikan objek penelitian disebut...",
+                options: ["Data", "Sampel", "Variabel", "Responden", "Populasi"],
+                correct: 1,
+                explanation: "Sampel mewakili populasi penelitian."
+            },
+            {
+                question: "Teknik pengambilan sampel secara acak disebut...",
+                options: ["Stratified sampling", "Simple random sampling", "Purposive sampling", "Cluster sampling", "Snowball sampling"],
+                correct: 1,
+                explanation: "Setiap anggota populasi memiliki kesempatan sama."
+            },
+            {
+                question: "Teknik pengambilan sampel dengan mempertimbangkan lapisan tertentu disebut...",
+                options: ["Stratified sampling", "Cluster sampling", "Random sampling", "Purposive sampling", "Snowball sampling"],
+                correct: 0,
+                explanation: "Stratified = populasi dibagi menurut strata/lapisan."
+            },
+            {
+                question: "Teknik pengambilan sampel berdasarkan wilayah disebut...",
+                options: ["Cluster sampling", "Purposive sampling", "Quota sampling", "Stratified sampling", "Random sampling"],
+                correct: 0,
+                explanation: "Cluster sampling digunakan untuk populasi besar dan luas."
+            },
+            {
+                question: "Teknik pengambilan sampel berdasarkan pertimbangan tertentu disebut...",
+                options: ["Stratified sampling", "Random sampling", "Purposive sampling", "Cluster sampling", "Systematic sampling"],
+                correct: 2,
+                explanation: "Pemilihan dilakukan secara sengaja oleh peneliti."
+            },
+            {
+                question: "Teknik pengumpulan data dengan mengamati langsung disebut...",
+                options: ["Kuesioner", "Observasi", "Studi literatur", "Dokumentasi", "Eksperimen"],
+                correct: 1,
+                explanation: "Observasi = pengamatan langsung terhadap objek."
+            },
+            {
+                question: "Daftar pertanyaan tertulis untuk responden disebut...",
+                options: ["Pedoman wawancara", "Catatan lapangan", "Kuesioner", "Transkrip", "Data sekunder"],
+                correct: 2,
+                explanation: "Kuesioner berisi daftar pertanyaan tertulis."
+            },
+            {
+                question: "Langkah penelitian yang dilakukan dengan membaca teori dan jurnal disebut...",
+                options: ["Observasi", "Studi literatur", "Pengumpulan data", "Analisis data", "Eksperimen"],
+                correct: 1,
+                explanation: "Studi literatur dilakukan untuk memperkuat teori."
+            },
+            {
+                question: "Analisis data berupa angka dan menggunakan statistik disebut...",
+                options: ["Analisis kualitatif", "Analisis kuantitatif", "Analisis deskriptif", "Analisis eksploratif", "Analisis teori"],
+                correct: 1,
+                explanation: "Data numerik dianalisis secara kuantitatif."
+            },
+            {
+                question: "Ringkasan singkat hasil penelitian disebut...",
+                options: ["Pendahuluan", "Tinjauan pustaka", "Abstrak", "Kesimpulan", "Lampiran"],
+                correct: 2,
+                explanation: "Abstrak berada di awal laporan penelitian."
+            },
+            {
+                question: "Ciri utama penelitian sosial adalah bersifat...",
+                options: ["Subjektif", "Empiris", "Pribadi", "Tidak terukur", "Emosional"],
+                correct: 1,
+                explanation: "Empiris = berdasarkan fakta nyata."
+            },
+            {
+                question: "Penelitian yang menggabungkan metode kuantitatif dan kualitatif disebut...",
+                options: ["Eksplanatori", "Campuran (mixed methods)", "Deskriptif", "Eksploratif", "Evaluatif"],
+                correct: 1,
+                explanation: "Mixed methods = menggabungkan dua pendekatan."
+            },
+            {
+                question: "Langkah terakhir dalam proses penelitian sosial adalah...",
+                options: ["Merumuskan masalah", "Mengumpulkan data", "Menganalisis data", "Menyusun laporan", "Menentukan hipotesis"],
+                correct: 3,
+                explanation: "Laporan berisi hasil dan kesimpulan penelitian."
+            },
+            {
+                question: "Tujuan utama penggunaan sampel dalam penelitian adalah...",
+                options: ["Mengurangi kesalahan penelitian", "Mewakili populasi", "Menghemat waktu", "Menentukan hipotesis", "Menghilangkan variabel kontrol"],
+                correct: 1,
+                explanation: "Sampel digunakan untuk mewakili populasi secara ilmiah."
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let answers = [];
+
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        function initQuiz() {
+            questions.forEach(q => {
+                const correctAnswer = q.options[q.correct];
+                const shuffledOptions = shuffleArray(q.options);
+                q.shuffledOptions = shuffledOptions;
+                q.shuffledCorrect = shuffledOptions.indexOf(correctAnswer);
+            });
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const q = questions[currentQuestion];
+            const content = document.getElementById('quizContent');
+            
+            content.innerHTML = `
+                <div class="question-card">
+                    <div class="question-number">SOAL ${currentQuestion + 1} DARI ${questions.length}</div>
+                    <div class="question-text">${q.question}</div>
+                    <div class="options">
+                        ${q.shuffledOptions.map((opt, idx) => `
+                            <div class="option" onclick="selectAnswer(${idx})">
+                                <input type="radio" name="answer" id="opt${idx}" value="${idx}">
+                                <label for="opt${idx}">${opt}</label>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="explanation" id="explanation">
+                        📝 ${q.explanation}
+                    </div>
+                </div>
+                <div class="navigation">
+                    ${currentQuestion > 0 ? '<button class="btn btn-secondary" onclick="prevQuestion()">← Sebelumnya</button>' : '<div></div>'}
+                    <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()" disabled>
+                        ${currentQuestion < questions.length - 1 ? 'Selanjutnya →' : 'Lihat Hasil'}
+                    </button>
+                </div>
+            `;
+            
+            updateProgress();
+        }
+
+        function selectAnswer(idx) {
+            const q = questions[currentQuestion];
+            const options = document.querySelectorAll('.option');
+            const explanation = document.getElementById('explanation');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            options.forEach((opt, i) => {
+                opt.classList.add('disabled');
+                opt.onclick = null;
+                if (i === q.shuffledCorrect) {
+                    opt.classList.add('correct');
+                } else if (i === idx && i !== q.shuffledCorrect) {
+                    opt.classList.add('incorrect');
+                }
+            });
+            
+            explanation.classList.add('show');
+            nextBtn.disabled = false;
+            
+            answers[currentQuestion] = idx;
+            if (idx === q.shuffledCorrect) {
+                score++;
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                renderQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                renderQuestion();
+                
+                if (answers[currentQuestion] !== undefined) {
+                    selectAnswer(answers[currentQuestion]);
+                }
+            }
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+            document.getElementById('progressText').textContent = `Soal ${currentQuestion + 1} dari ${questions.length}`;
+        }
+
+        function showResults() {
+            const content = document.getElementById('quizContent');
+            const percentage = (score / questions.length * 100).toFixed(0);
+            let grade = '';
+            
+            if (percentage >= 90) grade = 'Sempurna! 🏆';
+            else if (percentage >= 80) grade = 'Sangat Baik! 🌟';
+            else if (percentage >= 70) grade = 'Baik! 👍';
+            else if (percentage >= 60) grade = 'Cukup! 📚';
+            else grade = 'Perlu Belajar Lagi! 💪';
+            
+            content.innerHTML = `
+                <div class="result-card">
+                    <h2>🎉 Quiz Selesai!</h2>
+                    <div class="score-circle">${score}/${questions.length}</div>
+                    <h3>${grade}</h3>
+                    <div class="result-details">
+                        <div class="result-item">
+                            <span><strong>Nilai:</strong></span>
+                            <span>${percentage}%</span>
+                        </div>
+                        <div class="result-item">
+                            <span><strong>Jawaban Benar:</strong></span>
+                            <span>${score} soal</span>
+                        </div>
+                        <div class="result-item">
+                            <span><strong>Jawaban Salah:</strong></span>
+                            <span>${questions.length - score} soal</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="location.reload()">🔄 Ulangi Quiz</button>
+                </div>
+            `;
+        }
+
+        initQuiz();
+    </script>
+</body>
+</html>
